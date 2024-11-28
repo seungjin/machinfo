@@ -3,19 +3,15 @@ use serde::Serialize;
 use serde_json;
 use sysinfo::{Components, Disks, Networks, System};
 
-// Version information
-const GIT_HASH: &str = env!("GIT_HASH"); // From build.rs
-const GIT_BRANCH: &'static str = env!("GIT_BRANCH");
-const GIT_COMMIT_DATE: &'static str = env!("GIT_COMMIT_DATE");
-const BUILD_TIME: &str = env!("BUILD_TIMESTAMP");
-
-fn version_string() -> &'static str {
-    Box::leak(
-        format!(
-            "{}(mini hash), {}(branch)\nCommit at {}\n Build at {}",
-            GIT_HASH, GIT_BRANCH, GIT_COMMIT_DATE, BUILD_TIME
-        )
-        .into_boxed_str(),
+const fn version_string() -> &'static str {
+    concat!(
+        env!("GIT_HASH"),
+        "(mini hash), ",
+        env!("GIT_BRANCH"),
+        "(branch)\nCommit at ",
+        env!("GIT_COMMIT_DATE"),
+        "\nBuild at ",
+        env!("BUILD_TIMESTAMP")
     )
 }
 
@@ -32,7 +28,7 @@ struct MachineInfo {
 }
 
 fn main() {
-    let cli = Cli::parse();
+    let _ = Cli::parse();
 
     let mut sys = System::new_all();
     sys.refresh_all();
