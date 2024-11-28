@@ -1,6 +1,27 @@
+use clap::Parser;
 use serde::Serialize;
 use serde_json;
 use sysinfo::{Components, Disks, Networks, System};
+
+// Version information
+const GIT_HASH: &str = env!("GIT_HASH"); // From build.rs
+const GIT_BRANCH: &'static str = env!("GIT_BRANCH");
+const GIT_COMMIT_DATE: &'static str = env!("GIT_COMMIT_DATE");
+const BUILD_TIME: &str = env!("BUILD_TIMESTAMP");
+
+fn version_string() -> &'static str {
+    Box::leak(
+        format!(
+            "{}(mini hash), {}(branch)\nCommit at {}\n Build at {}",
+            GIT_HASH, GIT_BRANCH, GIT_COMMIT_DATE, BUILD_TIME
+        )
+        .into_boxed_str(),
+    )
+}
+
+#[derive(Parser)]
+#[command(version = version_string())]
+struct Cli {}
 
 #[derive(Debug, Serialize)]
 struct MachineInfo {
@@ -11,9 +32,7 @@ struct MachineInfo {
 }
 
 fn main() {
-    println!("Git Hash: {}", env!("GIT_HASH"));
-    println!("Git Branch: {}", env!("GIT_BRANCH"));
-    println!("Commit Date: {}", env!("GIT_COMMIT_DATE"));
+    let cli = Cli::parse();
 
     let mut sys = System::new_all();
     sys.refresh_all();

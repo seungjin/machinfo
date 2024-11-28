@@ -1,3 +1,4 @@
+use chrono::{Local, Utc};
 use std::process::Command;
 
 fn main() {
@@ -6,10 +7,13 @@ fn main() {
     let branch = get_git_branch();
     let commit_date = get_git_commit_date();
 
+    let now = Utc::now().with_timezone(&Local);
+
     // Pass to compiler
     println!("cargo:rustc-env=GIT_HASH={}", hash);
     println!("cargo:rustc-env=GIT_BRANCH={}", branch);
     println!("cargo:rustc-env=GIT_COMMIT_DATE={}", commit_date);
+    println!("cargo:rustc-env=BUILD_TIMESTAMP={}", now.to_rfc2822());
 
     // Force rebuild if git state changes
     println!("cargo:rerun-if-changed=.git/HEAD");
@@ -39,7 +43,7 @@ fn get_git_branch() -> String {
 
 fn get_git_commit_date() -> String {
     let output = Command::new("git")
-        .args(&["log", "-1", "--format=%cd", "--date=iso"])
+        .args(&["log", "-1", "--format=%cD"])
         .output()
         .expect("Failed to get commit date");
     String::from_utf8(output.stdout)
